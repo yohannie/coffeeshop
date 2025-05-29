@@ -14,10 +14,30 @@ class OrderController extends Controller
         $this->middleware('admin');
     }
 
+    public function index(Request $request)
+    {
+        $status = $request->query('status', 'active');
+        
+        $orders = Order::with(['user', 'items.product'])
+            ->when($status === 'active', function($query) {
+                return $query->whereNotIn('status', ['completed', 'cancelled']);
+            })
+            ->when($status === 'completed', function($query) {
+                return $query->where('status', 'completed');
+            })
+            ->latest()
+            ->paginate(10);
+            
+        return view('admin.orders.index', [
+            'orders' => $orders,
+            'status' => $status
+        ]);
+    }
+
     public function show(Order $order)
     {
         $order->load(['user', 'items.product']);
-        return response()->json(['order' => $order]);
+        return view('admin.orders.show', compact('order'));
     }
 
     public function updateStatus(Request $request, Order $order)
@@ -36,9 +56,6 @@ class OrderController extends Controller
         // Broadcast to the specific user's channel
         event(new OrderStatusUpdated($order));
 
-        return response()->json([
-            'message' => 'Order status updated successfully',
-            'order' => $order->load('user', 'items.product')
-        ]);
+        return back()->with('success', 'Order status updated successfully');
     }
 } 

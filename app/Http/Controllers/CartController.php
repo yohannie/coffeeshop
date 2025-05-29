@@ -9,6 +9,7 @@ use App\Events\NewOrderPlaced;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Support\Facades\Storage;
 
 class CartController extends Controller
 {
@@ -35,7 +36,7 @@ class CartController extends Controller
                     'name' => $product->name,
                     'quantity' => 1,
                     'price' => $product->price,
-                    'image' => $product->image_url
+                    'image' => $product->image_full_url
                 ];
             }
             

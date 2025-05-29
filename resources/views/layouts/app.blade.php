@@ -36,7 +36,7 @@
                 </div>
                 <div class="flex items-center">
                     @auth
-                        <a href="{{ route('user.dashboard') }}" class="hover:bg-brown-dark px-3 py-2 rounded-md">Dashboard</a>
+                        <a href="{{ route('dashboard') }}" class="hover:bg-brown-dark px-3 py-2 rounded-md">Dashboard</a>
                         <form method="POST" action="{{ route('logout') }}" class="ml-3">
                             @csrf
                             <button type="submit" class="hover:bg-brown-dark px-3 py-2 rounded-md">Logout</button>
@@ -61,5 +61,10 @@
             <p>&copy; {{ date('Y') }} Coffee Shop. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    @stack('scripts')
 </body>
 </html> 

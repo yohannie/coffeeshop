@@ -6,7 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
@@ -14,14 +17,18 @@ return new class extends Migration
             $table->text('description');
             $table->decimal('price', 8, 2);
             $table->integer('stock')->default(0);
-            $table->string('image')->nullable();
+            $table->string('category');
+            $table->string('image_url')->nullable();
             $table->boolean('is_available')->default(true);
             $table->timestamps();
         });
     }
 
-    public function down()
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
         Schema::dropIfExists('products');
     }
-}; 
+};

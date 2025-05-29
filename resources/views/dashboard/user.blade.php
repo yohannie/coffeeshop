@@ -24,6 +24,10 @@
         .border-brown {
             border-color: #6F4E37;
         }
+        .category-btn.active {
+            background-color: #6F4E37;
+            color: white;
+        }
     </style>
 </head>
 <body class="bg-coffee" x-data="{ cartOpen: false }">
@@ -89,16 +93,16 @@
         <!-- Categories -->
         <div class="px-4 sm:px-0 mb-8">
             <div class="flex space-x-4">
-                <button class="px-4 py-2 bg-brown text-white rounded-md hover:bg-brown-dark focus:outline-none focus:ring-2 focus:ring-brown">
+                <button onclick="filterProducts('all')" class="category-btn active px-4 py-2 bg-brown text-white rounded-md hover:bg-brown-dark focus:outline-none focus:ring-2 focus:ring-brown">
                     All
                 </button>
-                <button class="px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brown">
+                <button onclick="filterProducts('Hot Coffee')" class="category-btn px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brown">
                     Hot Coffee
                 </button>
-                <button class="px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brown">
+                <button onclick="filterProducts('Cold Coffee')" class="category-btn px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brown">
                     Cold Coffee
                 </button>
-                <button class="px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brown">
+                <button onclick="filterProducts('Pastries')" class="category-btn px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brown">
                     Pastries
                 </button>
             </div>
@@ -108,11 +112,11 @@
         <div class="px-4 py-6 sm:px-0">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach($products as $product)
-                <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="product-item bg-white overflow-hidden shadow rounded-lg" data-category="{{ $product->category }}">
                     <div class="p-5">
                         <div class="aspect-w-16 aspect-h-9 mb-4">
-                            @if($product->image)
-                                <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}" class="object-cover rounded-lg w-full h-48">
+                            @if($product->image_full_url)
+                                <img src="{{ $product->image_full_url }}" alt="{{ $product->name }}" class="object-cover rounded-lg w-full h-48">
                             @else
                                 <div class="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">
                                     <span class="text-4xl">☕</span>
@@ -357,6 +361,25 @@
             html += '</div>';
             $('#cart-items').html(html);
             $('#cart-total').text(`₱${total.toFixed(2)}`);
+        }
+
+        function filterProducts(category) {
+            // Update active button
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-brown', 'text-white');
+                btn.classList.add('bg-white', 'text-gray-700');
+            });
+            event.currentTarget.classList.remove('bg-white', 'text-gray-700');
+            event.currentTarget.classList.add('active', 'bg-brown', 'text-white');
+
+            // Show/hide products
+            document.querySelectorAll('.product-item').forEach(item => {
+                if (category === 'all' || item.dataset.category === category) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
         }
     </script>
 </body>

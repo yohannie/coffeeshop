@@ -9,6 +9,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -65,5 +66,16 @@ Route::middleware('auth')->group(function () {
         // Order Routes
         Route::get('/orders/{order}', [OrderController::class, 'show']);
         Route::post('/orders/{order}/status', [OrderController::class, 'updateStatus']);
+    });
+
+    // New admin routes
+    Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::resource('users', UserController::class);
+        Route::resource('products', ProductController::class);
+        Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::post('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+        Route::get('reports', [ReportController::class, 'index'])->name('reports');
     });
 });

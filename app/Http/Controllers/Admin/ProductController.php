@@ -32,13 +32,16 @@ class ProductController extends Controller
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
+            'category' => 'required|string',
             'image' => 'nullable|image|max:2048',
+            'image_url' => 'nullable|url',
             'is_available' => 'boolean'
         ]);
 
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('products', 'public');
-            $validated['image'] = $path;
+            $validated['image_path'] = $path;
+            $validated['image_url'] = null;
         }
 
         Product::create($validated);
@@ -49,7 +52,7 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        return view('admin.products.edit', compact('product'));
+        return response()->json($product);
     }
 
     public function update(Request $request, Product $product)
@@ -59,16 +62,20 @@ class ProductController extends Controller
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
+            'category' => 'required|string',
             'image' => 'nullable|image|max:2048',
+            'image_url' => 'nullable|url',
             'is_available' => 'boolean'
         ]);
 
         if ($request->hasFile('image')) {
-            if ($product->image) {
-                Storage::disk('public')->delete($product->image);
-            }
+            $product->deleteImage();
             $path = $request->file('image')->store('products', 'public');
-            $validated['image'] = $path;
+            $validated['image_path'] = $path;
+            $validated['image_url'] = null;
+        } elseif ($request->filled('image_url')) {
+            $product->deleteImage();
+            $validated['image_path'] = null;
         }
 
         $product->update($validated);
@@ -79,10 +86,7 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        if ($product->image) {
-            Storage::disk('public')->delete($product->image);
-        }
-        
+        $product->deleteImage();
         $product->delete();
 
         return redirect()->route('admin.products.index')

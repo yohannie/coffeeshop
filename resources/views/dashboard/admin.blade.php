@@ -279,40 +279,51 @@
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
-                                        @foreach($orders->whereIn('status', ['processing', 'preparing', 'ready']) as $order)
+                                        @foreach($activeOrders as $order)
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">#{{ $order->id }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                #{{ $order->id }}
+                                            </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="text-sm font-medium text-gray-900">{{ $order->user->name }}</div>
                                                 <div class="text-sm text-gray-500">{{ $order->user->email }}</div>
                                             </td>
-                                            <td class="px-6 py-4">
+                                            <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="text-sm text-gray-900">
-                                                    @foreach($order->products as $product)
-                                                        <div>{{ $product->name }} (x{{ $product->pivot->quantity }})</div>
+                                                    {{ $order->items->count() }} items
+                                                </div>
+                                                <div class="text-xs text-gray-500">
+                                                    @foreach($order->items as $item)
+                                                        {{ $item->quantity }}x {{ $item->product->name }}@if(!$loop->last),@endif
                                                     @endforeach
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ number_format($order->total_amount, 2) }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                ₱{{ number_format($order->total_amount, 2) }}
+                                            </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <select onchange="updateOrderStatus({{ $order->id }}, this.value)" class="text-sm rounded-full px-2 py-1 border-gray-300 focus:outline-none focus:ring-2 focus:ring-brown-500 focus:border-brown-500 {{ $order->status === 'processing' ? 'bg-yellow-100 text-yellow-800' : ($order->status === 'preparing' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800') }}">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                    @if($order->status === 'processing') bg-yellow-100 text-yellow-800
+                                                    @elseif($order->status === 'preparing') bg-blue-100 text-blue-800
+                                                    @elseif($order->status === 'ready') bg-green-100 text-green-800
+                                                    @else bg-gray-100 text-gray-800
+                                                    @endif">
+                                                    {{ ucfirst($order->status) }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {{ $order->expected_delivery ? $order->expected_delivery->format('M d, Y H:i') : 'Not set' }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button onclick="viewOrderDetails({{ $order->id }})" class="text-indigo-600 hover:text-indigo-900 mr-2">View</button>
+                                                <select onchange="updateOrderStatus({{ $order->id }}, this.value)" class="text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                                                    <option value="" disabled>Update Status</option>
                                                     <option value="processing" {{ $order->status === 'processing' ? 'selected' : '' }}>Processing</option>
                                                     <option value="preparing" {{ $order->status === 'preparing' ? 'selected' : '' }}>Preparing</option>
                                                     <option value="ready" {{ $order->status === 'ready' ? 'selected' : '' }}>Ready</option>
-                                                    <option value="completed" {{ $order->status === 'completed' ? 'selected' : '' }}>Completed</option>
-                                                    <option value="cancelled" {{ $order->status === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                                    <option value="completed" {{ $order->status === 'completed' ? 'selected' : '' }}>Complete</option>
+                                                    <option value="cancelled" {{ $order->status === 'cancelled' ? 'selected' : '' }}>Cancel</option>
                                                 </select>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <input type="datetime-local" 
-                                                    value="{{ $order->expected_delivery ? $order->expected_delivery->format('Y-m-d\TH:i') : '' }}"
-                                                    onchange="updateDeliveryTime({{ $order->id }}, this.value)"
-                                                    class="text-sm rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-brown-500 focus:border-brown-500">
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                <button onclick="viewOrderDetails({{ $order->id }})" class="text-blue-600 hover:text-blue-900">
-                                                    View Details
-                                                </button>
                                             </td>
                                         </tr>
                                         @endforeach
@@ -345,24 +356,31 @@
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
-                                        @foreach($orders->whereIn('status', ['completed', 'cancelled']) as $order)
+                                        @foreach($completedOrders as $order)
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">#{{ $order->id }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                #{{ $order->id }}
+                                            </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="text-sm font-medium text-gray-900">{{ $order->user->name }}</div>
                                                 <div class="text-sm text-gray-500">{{ $order->user->email }}</div>
                                             </td>
-                                            <td class="px-6 py-4">
+                                            <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="text-sm text-gray-900">
-                                                    @foreach($order->products as $product)
-                                                        <div>{{ $product->name }} (x{{ $product->pivot->quantity }})</div>
+                                                    {{ $order->items->count() }} items
+                                                </div>
+                                                <div class="text-xs text-gray-500">
+                                                    @foreach($order->items as $item)
+                                                        {{ $item->quantity }}x {{ $item->product->name }}@if(!$loop->last),@endif
                                                     @endforeach
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ number_format($order->total_amount, 2) }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                ₱{{ number_format($order->total_amount, 2) }}
+                                            </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $order->status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                                    {{ ucfirst($order->status) }}
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                    Completed
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -495,6 +513,31 @@
                     </form>
                 </div>
             </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="bg-white p-4 rounded-xl shadow-md text-center">
+            <h3 class="text-brown text-lg font-bold">Users</h3>
+            <p class="text-2xl font-bold">{{ $stats['users_count'] }}</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-md text-center">
+            <h3 class="text-brown text-lg font-bold">Orders</h3>
+            <p class="text-2xl font-bold">{{ $stats['orders_count'] }}</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-md text-center">
+            <h3 class="text-brown text-lg font-bold">Products</h3>
+            <p class="text-2xl font-bold">{{ $stats['products_count'] }}</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-md text-center">
+            <h3 class="text-brown text-lg font-bold">Revenue</h3>
+            <p class="text-2xl font-bold">₱{{ number_format($stats['revenue'], 2) }}</p>
+        </div>
+
+        <!-- Inventory -->
+        <div class="bg-white p-4 rounded-xl shadow-md">
+            <h2 class="text-xl font-semibold text-brown mb-2">Inventory</h2>
+            <p class="text-sm text-gray-600">View and update coffee products and stock.</p>
+            <a href="{{ route('admin.products.index') }}" class="inline-block mt-4 text-sm text-brown font-semibold hover:underline">Manage Inventory</a>
         </div>
     </main>
 
@@ -770,7 +813,7 @@
                             <div class="text-sm text-gray-900">${user.email}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${roleClass}">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold ${roleClass}">
                                 ${user.role.name.charAt(0).toUpperCase() + user.role.name.slice(1)}
                             </span>
                         </td>
