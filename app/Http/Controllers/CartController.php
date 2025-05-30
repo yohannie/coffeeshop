@@ -13,11 +13,6 @@ use Illuminate\Support\Facades\Storage;
 
 class CartController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     public function addToCart(Request $request, Product $product)
     {
         try {
@@ -98,12 +93,18 @@ class CartController extends Controller
             }
 
             // Create the order
-            $order = Order::create([
-                'user_id' => auth()->id(),
+            $orderData = [
                 'total_amount' => $totalAmount,
                 'status' => 'processing',
                 'expected_delivery' => now()->addMinutes(30)
-            ]);
+            ];
+
+            // Add user_id if user is authenticated
+            if (auth()->check()) {
+                $orderData['user_id'] = auth()->id();
+            }
+
+            $order = Order::create($orderData);
 
             // Create order items
             foreach ($orderItems as $item) {

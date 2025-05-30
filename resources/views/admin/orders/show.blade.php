@@ -23,14 +23,41 @@
                 <div class="bg-brown/10 p-6 rounded-lg">
                     <h3 class="text-lg font-semibold text-brown mb-4">Customer Information</h3>
                     <div class="space-y-2">
-                        <p class="text-sm">
-                            <span class="font-medium">Name:</span> 
-                            {{ $order->user->name }}
-                        </p>
-                        <p class="text-sm">
-                            <span class="font-medium">Email:</span> 
-                            {{ $order->user->email }}
-                        </p>
+                        @if($order->is_guest)
+                            <p class="text-sm">
+                                <span class="font-medium">Name:</span> 
+                                {{ $order->customer_name }}
+                            </p>
+                            <p class="text-sm">
+                                <span class="font-medium">Email:</span> 
+                                {{ $order->email }}
+                            </p>
+                            <p class="text-sm">
+                                <span class="font-medium">Phone:</span> 
+                                {{ $order->phone }}
+                            </p>
+                            @if($order->delivery_address)
+                            <p class="text-sm">
+                                <span class="font-medium">Delivery Address:</span> 
+                                {{ $order->delivery_address }}
+                            </p>
+                            @endif
+                            @if($order->notes)
+                            <p class="text-sm">
+                                <span class="font-medium">Notes:</span> 
+                                {{ $order->notes }}
+                            </p>
+                            @endif
+                        @else
+                            <p class="text-sm">
+                                <span class="font-medium">Name:</span> 
+                                {{ $order->user->name }}
+                            </p>
+                            <p class="text-sm">
+                                <span class="font-medium">Email:</span> 
+                                {{ $order->user->email }}
+                            </p>
+                        @endif
                         <p class="text-sm">
                             <span class="font-medium">Order Date:</span> 
                             {{ $order->created_at->format('M d, Y H:i') }}

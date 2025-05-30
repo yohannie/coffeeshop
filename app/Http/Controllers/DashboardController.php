@@ -15,13 +15,13 @@ class DashboardController extends Controller
 
     public function index()
     {
-        $products = Product::where('is_available', true)->get();
-        $orders = Order::where('user_id', auth()->id())
+        $user = auth()->user();
+        $orders = Order::with(['items.product'])
+            ->where('user_id', $user->id)
             ->latest()
-            ->with('products')
             ->get();
-            
-        return view('dashboard.user', compact('products', 'orders'));
+
+        return view('dashboard', compact('orders'));
     }
 
     public function admin()

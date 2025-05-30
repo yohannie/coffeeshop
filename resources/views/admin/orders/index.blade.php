@@ -53,8 +53,19 @@
                                 <div class="text-sm font-medium text-gray-900">#{{ $order->id }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ $order->user->name }}</div>
-                                <div class="text-sm text-gray-500">{{ $order->user->email }}</div>
+                                @if($order->is_guest)
+                                    <div class="text-sm text-gray-900">{{ $order->customer_name }}</div>
+                                    <div class="text-sm text-gray-500">{{ $order->email }}</div>
+                                    <div class="text-sm text-gray-500">{{ $order->phone }}</div>
+                                    @if($order->delivery_address)
+                                        <div class="text-sm text-gray-500">{{ $order->delivery_address }}</div>
+                                    @endif
+                                @elseif($order->user)
+                                    <div class="text-sm text-gray-900">{{ $order->user->name }}</div>
+                                    <div class="text-sm text-gray-500">{{ $order->user->email }}</div>
+                                @else
+                                    <div class="text-sm text-gray-500 italic">Unknown</div>
+                                @endif
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">

@@ -10,6 +10,9 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\GuestCheckoutController;
+use App\Http\Controllers\MenuController;
+use App\Http\Controllers\RegisterCheckoutController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,12 +25,8 @@ use App\Http\Controllers\Admin\ReportController;
 |
 */
 
-Route::get('/', function () {
-    if (!auth()->check()) {
-        return redirect()->route('login');
-    }
-    return redirect()->route('dashboard');
-})->name('home');
+// Public Routes
+Route::get('/', [MenuController::class, 'index'])->name('home');
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {
@@ -37,19 +36,32 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [RegisterController::class, 'register']);
 });
 
+// Cart Routes (Public)
+Route::post('/cart/add/{product}', [CartController::class, 'addToCart']);
+Route::post('/cart/remove/{productId}', [CartController::class, 'removeFromCart']);
+Route::post('/cart/update/{productId}', [CartController::class, 'updateCart']);
+
+// Guest Checkout Routes
+Route::get('/checkout/guest', [GuestCheckoutController::class, 'show'])->name('checkout.guest');
+Route::post('/checkout/guest/process', [GuestCheckoutController::class, 'processCheckout'])->name('checkout.guest.process');
+Route::get('/checkout/success/{order}', [GuestCheckoutController::class, 'showSuccess'])->name('checkout.success');
+
+// Registration Checkout Routes
+Route::get('/checkout/register', [RegisterCheckoutController::class, 'showCheckoutForm'])->name('checkout.register');
+Route::post('/checkout/register/process', [RegisterCheckoutController::class, 'processCheckout'])->name('checkout.register.process');
+Route::get('/checkout/success/{order}', [RegisterCheckoutController::class, 'showSuccess'])->name('checkout.success');
+
+// Authenticated Routes
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     
-    // User Dashboard - accessible to all authenticated users
+    // User Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
-    // Cart Routes
-    Route::post('/cart/add/{product}', [CartController::class, 'addToCart']);
-    Route::post('/cart/remove/{productId}', [CartController::class, 'removeFromCart']);
-    Route::post('/cart/update/{productId}', [CartController::class, 'updateCart']);
+    // Authenticated Cart Routes
     Route::post('/cart/checkout', [CartController::class, 'checkout']);
     
-    // Admin Routes - accessible only to admins
+    // Admin Routes
     Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         

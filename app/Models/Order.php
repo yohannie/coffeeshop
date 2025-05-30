@@ -13,23 +13,16 @@ class Order extends Model
         'user_id',
         'total_amount',
         'status',
-        'notes'
+        'expected_delivery',
     ];
 
     protected $casts = [
-        'total_amount' => 'decimal:2'
+        'expected_delivery' => 'datetime',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function products()
-    {
-        return $this->belongsToMany(Product::class, 'order_items')
-            ->withPivot('quantity', 'price')
-            ->withTimestamps();
     }
 
     public function items()
